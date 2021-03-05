@@ -7,6 +7,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"sort"
 	"strings"
 	"sync"
 	"testing"
@@ -2098,6 +2099,27 @@ provider "aws" {
   skip_requesting_account_id  = true
 }
 `, tag1, value1, tag2, value2))
+}
+
+func testCheckResourceAttrIsSortedCsv(resourceName, attributeName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		is, err := primaryInstanceState(s, resourceName)
+		if err != nil {
+			return err
+		}
+
+		v, ok := is.Attributes[attributeName]
+		if !ok {
+			return fmt.Errorf("%s: No attribute %q found", resourceName, attributeName)
+		}
+
+		splitV := strings.Split(v, ",")
+		if !sort.StringsAreSorted(splitV) {
+			return fmt.Errorf("%s: Expected attribute %q to be sorted, got %q", resourceName, attributeName, v)
+		}
+
+		return nil
+	}
 }
 
 // composeConfig can be called to concatenate multiple strings to build test configurations
