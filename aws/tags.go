@@ -75,3 +75,17 @@ func ec2TagSpecificationsFromMap(m map[string]interface{}, t string) []*ec2.TagS
 		},
 	}
 }
+
+// ec2TagSpecificationsFromKeyValueTags returns the tag specifications for the given KeyValueTags object and resource type.
+func ec2TagSpecificationsFromKeyValueTags(tags keyvaluetags.KeyValueTags, t string) []*ec2.TagSpecification {
+	if len(tags) == 0 {
+		return nil
+	}
+
+	return []*ec2.TagSpecification{
+		{
+			ResourceType: aws.String(t),
+			Tags:         tags.IgnoreAws().Ec2Tags(),
+		},
+	}
+}
